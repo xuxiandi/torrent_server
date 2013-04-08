@@ -116,6 +116,7 @@ bool torrent_server::create_server(short port)
 			m_server_thread = boost::thread(boost::bind(&http::server::server::run, m_server.get()));
 		}
 	}
+	return true;
 }
 
 void torrent_server::destory_server()

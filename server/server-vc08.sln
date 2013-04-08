@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtorrent", "..\libtorrent\include\libtorrent.vcproj", "{0795F713-7B86-4250-8B4E-4F4663AF6956}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torrent_server", "torrent_server.vcproj", "{787C285C-2931-4CDA-A27C-CA4662DE9643}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0795F713-7B86-4250-8B4E-4F4663AF6956} = {0795F713-7B86-4250-8B4E-4F4663AF6956}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0795F713-7B86-4250-8B4E-4F4663AF6956}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0795F713-7B86-4250-8B4E-4F4663AF6956}.Debug|Win32.Build.0 = Debug|Win32
+		{0795F713-7B86-4250-8B4E-4F4663AF6956}.Release|Win32.ActiveCfg = Release|Win32
+		{0795F713-7B86-4250-8B4E-4F4663AF6956}.Release|Win32.Build.0 = Release|Win32
+		{787C285C-2931-4CDA-A27C-CA4662DE9643}.Debug|Win32.ActiveCfg = Debug|Win32
+		{787C285C-2931-4CDA-A27C-CA4662DE9643}.Debug|Win32.Build.0 = Debug|Win32
+		{787C285C-2931-4CDA-A27C-CA4662DE9643}.Release|Win32.ActiveCfg = Release|Win32
+		{787C285C-2931-4CDA-A27C-CA4662DE9643}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
