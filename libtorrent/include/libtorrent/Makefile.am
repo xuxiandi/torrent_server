@@ -41,6 +41,7 @@ nobase_include_HEADERS = \
   error_code.hpp               \
   escape_string.hpp            \
   extensions.hpp               \
+  extern_read_op.hpp           \
   file.hpp                     \
   file_pool.hpp                \
   file_storage.hpp             \
@@ -52,6 +53,7 @@ nobase_include_HEADERS = \
   http_seed_connection.hpp     \
   http_stream.hpp              \
   http_tracker_connection.hpp  \
+  http_server.hpp              \
   i2p_stream.hpp               \
   identify_client.hpp          \
   instantiate_connection.hpp   \
@@ -109,6 +111,7 @@ nobase_include_HEADERS = \
   torrent.hpp                  \
   torrent_info.hpp             \
   tracker_manager.hpp          \
+  torrent_server.hpp           \
   udp_socket.hpp               \
   udp_tracker_connection.hpp   \
   union_endpoint.hpp           \

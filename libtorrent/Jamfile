@@ -516,6 +516,7 @@ SOURCES =
 	torrent_info
 	time
 	tracker_manager
+	torrent_server
 	http_tracker_connection
 	udp_tracker_connection
 	sha1

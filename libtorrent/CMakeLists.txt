@@ -59,6 +59,7 @@ set(sources
 	torrent_handle
 	torrent_info
 	tracker_manager
+	torrent_server
 	http_tracker_connection
 	utf8
 	udp_tracker_connection
