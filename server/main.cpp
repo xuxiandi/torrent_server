@@ -17,18 +17,9 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
-
-#include "libtorrent/extensions/logger.hpp"
-#include "libtorrent/entry.hpp"
-#include "libtorrent/bencode.hpp"
-#include "libtorrent/session.hpp"
-
-#include "libtorrent/escape_string.hpp"
-#include "libtorrent/storage.hpp"
-#include "libtorrent/extern_read_op.hpp"
-
 #include <boost/cstdint.hpp>
 
+#include "libtorrent/session.hpp"
 #include "libtorrent/torrent_server.hpp"
 
 using namespace libtorrent;
