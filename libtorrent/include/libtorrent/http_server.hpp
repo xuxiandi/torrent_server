@@ -46,6 +46,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 
 namespace libtorrent {
@@ -1013,10 +1014,12 @@ namespace http {
 			explicit connection(boost::asio::io_service &io_service,
 				connection_manager *manager, request_handler &handler, read_callback &read_cb)
 				: m_socket(io_service)
+				, m_timer(io_service)
 				, m_connection_manager(manager)
 				, m_request_handler(handler)
 				, m_read_callback(read_cb)
-				, m_is_keep_alive(false)
+				, m_keep_alive(false)
+				, m_abort(false)
 			{
 
 			}
@@ -1039,7 +1042,11 @@ namespace http {
 			/// Stop all asynchronous operations associated with the connection.
 			void stop()
 			{
-				m_socket.close();
+				m_abort = true;
+
+				boost::system::error_code ignore;
+				m_timer.cancel(ignore);
+				m_socket.close(ignore);
 			}
 
 		private:
@@ -1054,8 +1061,13 @@ namespace http {
 				boost::shared_ptr<reply> reply_, std::size_t bytes_transferred, 
 				const boost::system::error_code& e);
 
+			void handle_timer(const boost::system::error_code &e);
+
 			/// Socket for the connection.
 			boost::asio::ip::tcp::socket m_socket;
+
+			/// deadline timer.
+			boost::asio::deadline_timer m_timer;
 
 			/// The manager for this connection.
 			connection_manager *m_connection_manager;
@@ -1079,10 +1091,13 @@ namespace http {
 			boost::shared_ptr<reply> m_reply;
 
 			/// Is keep alive.
-			bool m_is_keep_alive;
+			bool m_keep_alive;
 
 			/// The parser for the incoming request.
 			request_parser m_request_parser;
+
+			/// abort.
+			bool m_abort;
 		};
 
 		typedef boost::shared_ptr<connection> connection_ptr;
@@ -1145,6 +1160,7 @@ namespace http {
 							if (req.offset >= req.body_size)
 								return 0;
 							boost::this_thread::sleep(boost::posix_time::millisec(100));
+							return 0;
 						}
 					}
 					else
@@ -1181,21 +1197,27 @@ namespace http {
 					m_request->http_server_port = m_socket.local_endpoint(ignore_ec).port();
 					// handle request.
 					m_request_handler.handle_request(*m_request, *m_reply);
-					if (m_request->keep_alive && !m_is_keep_alive)
-						m_is_keep_alive = true;
+					if (m_request->keep_alive && !m_keep_alive)
+						m_keep_alive = true;
 					// copy rep to buffer.
 					std::string rep = m_reply->to_buffers();
 					std::copy(rep.begin(), rep.end(), m_buffer.begin());
 					m_reply->send_bytes = rep.length();
+					if (m_reply->send_bytes == 0)
+					{
+						m_timer.expires_from_now(boost::posix_time::seconds(1));
+						m_timer.async_wait(boost::bind(&connection::handle_timer, shared_from_this(), boost::asio::placeholders::error));
+						return ;
+					}
 					// send buffer to client.
 					boost::asio::async_write(m_socket, boost::asio::buffer(m_buffer, rep.length()),
 						boost::bind(&connection::handle_write, shared_from_this(), m_request, m_reply,
 						boost::asio::placeholders::bytes_transferred,
 						boost::asio::placeholders::error));
-					// if keep alive, async read http header.
-					if (m_request->keep_alive && m_reply->status != reply::bad_request)
+					// async read http header.
+					if (m_reply->status != reply::bad_request)
 					{
-						std::cout << "is keep alive\n" << std::endl;
+						std::cout << " keep alive: " << m_keep_alive << std::endl;
 						boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", 
 							boost::bind(&connection::handle_read, shared_from_this(),
 							boost::asio::placeholders::error,
@@ -1245,6 +1267,12 @@ namespace http {
 					reply_->content.clear();
 					int read_bytes = read_from_torrent(*request_, *reply_);
 					reply_->send_bytes = read_bytes;
+					if (m_reply->send_bytes == 0)
+					{
+						m_timer.expires_from_now(boost::posix_time::seconds(1));
+						m_timer.async_wait(boost::bind(&connection::handle_timer, shared_from_this(), boost::asio::placeholders::error));
+						return ;
+					}
 					boost::asio::async_write(m_socket, boost::asio::buffer(m_buffer, read_bytes),
 						boost::bind(&connection::handle_write, shared_from_this(), request_, reply_,
 						boost::asio::placeholders::bytes_transferred,
@@ -1253,13 +1281,15 @@ namespace http {
 				}
 				else
 				{
+					// for keep alive and not bad request.
 					if (request_ && request_->keep_alive)
 					{
 						if (m_reply->status == reply::bad_request)
 							m_connection_manager->stop(shared_from_this());
 						return ;
 					}
-					if (!request_) {
+					if (!request_)
+					{
 						m_connection_manager->stop(shared_from_this());
 						return ;
 					}
@@ -1276,6 +1306,29 @@ namespace http {
 			}
 		}
 
+		void connection::handle_timer(const boost::system::error_code &e)
+		{
+			if (m_abort || e)
+				return;
+
+			// read data to send.
+			m_reply->content.clear();
+			int read_bytes = read_from_torrent(*m_request, *m_reply);
+			if (read_bytes == 0)
+			{
+				// one second retry.
+				m_timer.expires_from_now(boost::posix_time::seconds(1));
+				m_timer.async_wait(boost::bind(&connection::handle_timer, shared_from_this(), boost::asio::placeholders::error));
+			}
+			else
+			{
+				m_reply->send_bytes = read_bytes;
+				boost::asio::async_write(m_socket, boost::asio::buffer(m_buffer, read_bytes),
+					boost::bind(&connection::handle_write, shared_from_this(), m_request, m_reply,
+					boost::asio::placeholders::bytes_transferred,
+					boost::asio::placeholders::error));
+			}
+		}
 		//////////////////////////////////////////////////////////////////////////
 		/// The top-level class of the HTTP server.
 		class server
