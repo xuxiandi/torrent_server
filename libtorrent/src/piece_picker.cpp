@@ -1560,7 +1560,7 @@ namespace libtorrent
 			}
 		}
 
-		// jackarain: 锟矫伙拷锟皆讹拷锟斤拷锟斤拷锟截凤拷式选锟斤拷锟介方式锟斤拷实锟斤拷.
+		// jackarain: 用户自定义下载方式选择块方式的实现.
 		if (options & user_defined_download)
 		{
 			int playing_pos = 0;

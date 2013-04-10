@@ -1005,6 +1005,7 @@ namespace http {
 
 		//////////////////////////////////////////////////////////////////////////
 		/// Represents a single connection from a client.
+		const static int io_buffer_size = 512 * 1024;
 		class connection
 			: public boost::enable_shared_from_this<connection>,
 			private boost::noncopyable
@@ -1079,7 +1080,7 @@ namespace http {
 			read_callback m_read_callback;
 
 			/// Buffer for torrent incoming data.
-			boost::array<char, 8192> m_buffer;
+			boost::array<char, io_buffer_size> m_buffer;
 
 			/// Buffer for incoming data.
 			boost::asio::streambuf m_response;

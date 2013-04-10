@@ -152,7 +152,7 @@ namespace libtorrent
 			speed_affinity = 32,
 			// ignore the prefer_whole_pieces parameter
 			ignore_whole_pieces = 64,
-			// jackarain: 锟皆讹拷锟斤拷锟斤拷锟截凤拷式.
+			// jackarain: 自定义下载方式.
 			user_defined_download = 128
 		};
 

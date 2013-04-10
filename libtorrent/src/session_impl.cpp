@@ -5279,7 +5279,13 @@ retry:
 
 		torrent& t = *i->second;
 		if (options & session::delete_files)
-			t.delete_files();
+		{
+			if (!t.delete_files())
+			{
+				if (m_alerts.should_post<torrent_delete_failed_alert>())
+					m_alerts.post_alert(torrent_delete_failed_alert(t.get_handle(), error_code()));
+			}
+		}
 
 		tptr->update_guage();
 

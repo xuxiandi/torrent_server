@@ -81,7 +81,7 @@ namespace libtorrent
 		, paused(false)
 		, auto_managed(false)
 		, sequential_download(false)
-		, user_defined_download(false)	// jackarain: 锟矫伙拷锟皆讹拷锟斤拷锟斤拷锟截凤拷式.
+		, user_defined_download(false)	// jackarain: �û��Զ������ط�ʽ.
 		, is_seeding(false)
 		, is_finished(false)
 		, has_metadata(false)
@@ -294,6 +294,12 @@ namespace libtorrent
 		INVARIANT_CHECK;
 		TORRENT_ASSERT(max_uploads >= 2 || max_uploads == -1);
 		TORRENT_ASYNC_CALL2(set_max_uploads, max_uploads, true);
+	}
+
+	void torrent_handle::use_interface(const char* net_interface) const
+	{
+		INVARIANT_CHECK;
+		TORRENT_ASYNC_CALL1(use_interface, std::string(net_interface));
 	}
 
 	int torrent_handle::max_connections() const
@@ -529,7 +535,6 @@ namespace libtorrent
 		TORRENT_ASYNC_CALL1(set_sequential_download, sd);
 	}
 
-	//jackarain
 	void torrent_handle::set_user_defined_download(bool ud) const
 	{
 		INVARIANT_CHECK;
@@ -598,12 +603,6 @@ namespace libtorrent
 
 #ifndef TORRENT_NO_DEPRECATE
 // ============ start deprecation ===============
-
-	void torrent_handle::use_interface(const char* net_interface) const
-	{
-		INVARIANT_CHECK;
-		TORRENT_ASYNC_CALL1(use_interface, std::string(net_interface));
-	}
 
 #if !TORRENT_NO_FPU
 	void torrent_handle::file_progress(std::vector<float>& progress) const
@@ -809,7 +808,7 @@ namespace libtorrent
 		TORRENT_ASYNC_CALL1(read_piece, piece);
 	}
 
-	// jackarain: 锟斤拷取锟斤拷片锟斤拷锟捷接匡拷实锟斤拷.
+	// jackarain: ��ȡ��Ƭ���ݽӿ�ʵ��.
 	void torrent_handle::read_piece(int piece, read_data_fun rdf) const
 	{
 		INVARIANT_CHECK;

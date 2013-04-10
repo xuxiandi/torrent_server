@@ -195,10 +195,10 @@ namespace libtorrent
 			error_code error;
 		};
 		void read_piece(int piece);
-		// jackarain: ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½Ý¶ï¿½È¡ï¿½Ä¾ï¿½ï¿½ï¿½Êµï¿½ï¿½.
+		// jackarain: ·ÖÆ¬Êý¾Ý¶ÁÈ¡µÄ¾ßÌåÊµÏÖ.
 		void read_piece(int piece, read_data_fun rdf);
 		void on_disk_read_complete(int ret, disk_io_job const& j, peer_request r, read_piece_struct* rp);
-		// jackarain: ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½Ý¶ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Øµï¿½.
+		// jackarain: ·ÖÆ¬Êý¾Ý¶ÁÈ¡Íê³ÉÊ±»Øµ÷.
 		void on_disk_read_complete(int ret, disk_io_job const& j,
 			peer_request r, boost::shared_ptr<read_piece_struct> rp, read_data_fun rdf);
 
@@ -226,8 +226,8 @@ namespace libtorrent
 		void set_sequential_download(bool sd);
 		bool is_sequential_download() const
 		{ return m_sequential_download; }
-	
-		// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+
+		// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 		void set_user_defined_download(bool ud);
 		bool is_user_defined_download() const
 		{ return m_user_defined_download; }
@@ -290,7 +290,7 @@ namespace libtorrent
 
 		bool should_check_files() const;
 
-		void delete_files();
+		bool delete_files();
 
 		// ============ start deprecation =============
 		void filter_piece(int index, bool filter);
@@ -1188,7 +1188,7 @@ namespace libtorrent
 		// its value until the piece picker is created
 		bool m_sequential_download:1;
 
-		// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+		// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 		bool m_user_defined_download:1;
 
 		// is false by default and set to
@@ -1395,9 +1395,6 @@ namespace libtorrent
 	public:
 		// set to false until we've loaded resume data
 		bool m_resume_data_loaded;
-
-		// set to true when the finished alert is posted
-		bool m_finished_alert_posted;
 #endif
 	};
 }

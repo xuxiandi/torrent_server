@@ -54,6 +54,7 @@ namespace libtorrent
 			, m_read_offset(0)
 			, m_read_size(NULL)
 			, m_request_size(0)
+			, m_cache_offset(-1)
 			, m_abort(false)
 		{ }
 
@@ -189,23 +190,50 @@ public:
 		BOOST_ASSERT(index >= 0 && index < info.num_pieces());
 		if (index >= info.num_pieces() || index < 0)
 			return ret;
-		torrent_status status = m_handle.status();
-		if (!status.pieces.empty())
+		torrent_status status = m_handle.status(torrent_handle::query_pieces);
+		bitfield &pieces = status.pieces;
+		if (!pieces.empty())
 		{
-			if (status.state != torrent_status::downloading &&
-				status.state != torrent_status::finished &&
-				status.state != torrent_status::seeding)
+			if (status.state != torrent_status::finished &&
+				 status.state != torrent_status::seeding &&
+				 status.state != torrent_status::downloading)
 				return ret;
 
-			// 设置下载位置.
-			std::vector<int> pieces;
+			// 查看是否需要计算新的下载位置.
+			bool set_download_point = true;
+			int min_piece_position = std::min(index, m_cache_offset);
+			int max_piece_position = std::max(index, m_cache_offset);
+			if (min_piece_position != -1)// min_piece_position 为-1, 需要设置下载位置, 也就是首次下载位置.
+			{
+				// 不为-1, 先计算下载点位置, 如果相等, 说明上一次已经设置过下载点位置.
+				if (min_piece_position == max_piece_position)
+					set_download_point = false;
+				else
+				{
+					// 查看上次请求的位置和当前位置是否连接已经下载的分块区域, 如果下载区域已经连接成块.
+					// 那么也不需要再设置下载点位置.
+					for (; min_piece_position < max_piece_position; min_piece_position++)
+						if (!pieces.get_bit(min_piece_position))
+							break;
+					// 表示下载块连接成区域.
+					if (min_piece_position == max_piece_position)
+						set_download_point = false;
+				}
+			}
 
-			pieces = m_handle.piece_priorities();
-			std::for_each(pieces.begin(), pieces.end(), boost::lambda::_1 = 1);
-			pieces[index] = 7;
-			m_handle.prioritize_pieces(pieces);
+			// 缓存下载位置.
+			m_cache_offset = index;
 
-			if (status.pieces.get_bit(index))
+			// 计算下载位置, 如果有需要, 则修改下载位置.
+			if (set_download_point)
+			{
+				std::vector<int> new_point(pieces.size(), 1);
+				new_point[index] = 7;
+				m_handle.prioritize_pieces(new_point);
+			}
+
+			// 如果有数据, 则进入读取.
+			if (pieces.get_bit(index))
 			{
 				// 保存参数信息.
 				m_current_buffer = data;
@@ -376,6 +404,7 @@ private:
 	size_type m_read_offset;
 	size_type *m_read_size;
 	size_type m_request_size;
+	int m_cache_offset;
 	bool m_abort;
 };
 

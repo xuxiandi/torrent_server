@@ -3,7 +3,7 @@
 # Using this script should be identical to the resulto of "autoreconf -fi".
 # Some code taken from the gnome macros/autogen.sh scripts.
 
-# $Id$
+# $Id: autotool.sh 7684 2012-11-19 05:23:46Z arvidn $
 
 
 ###############################################################################

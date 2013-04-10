@@ -782,7 +782,7 @@ namespace libtorrent
 		TORRENT_ASSERT(t);
 		if (!t) return 0;
 
-		// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+		// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 		if (t->is_user_defined_download())
 		{
 			ret |= piece_picker::user_defined_download; // | piece_picker::ignore_whole_pieces;

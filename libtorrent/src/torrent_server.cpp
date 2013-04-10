@@ -100,13 +100,14 @@ bool torrent_server::create_server(short port)
 
 		if (index == 0) return false;	// 一个视频文件也没有.
 
+		// 开始创建服务器.
 		if (!m_server)
 		{
 			std::ostringstream os;
 			os << port;
 			std::string port_string = os.str();
-			// 创建服务器.
 			std::string address = "0.0.0.0";
+
 			m_server.reset(new http::server::server(address, port_string,
 				".", boost::bind(&torrent_server::request_handle, this, _1, _2, _3),
 				boost::bind(&torrent_server::read_handle, this, _1, _2, _3, _4)
@@ -167,8 +168,9 @@ bool torrent_server::read_handle(int index, boost::int64_t offset, char *buffer,
 	}
 
 	size_type ret = 0;
-	// TODO: 考虑session提前退出, read_op读取数据的问题.
+
 	finder->read_op->read_data(buffer, offset, read_size, ret);
+	boost::this_thread::sleep(boost::posix_time::millisec(1));
 	read_size = ret;
 
 	return true;

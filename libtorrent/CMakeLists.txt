@@ -100,7 +100,7 @@ set(kademlia_sources
 
 set(includes include)
 
-option(shared "build libtorrent as a shared library" OFF)
+option(shared "build libtorrent as a shared library" ON)
 option(tcmalloc "link against google performance tools tcmalloc" OFF)
 option(pool-allocators "Uses a pool allocator for disk and piece buffers" ON)
 option(encryption "link against openssl and enable encryption" ON)
@@ -113,7 +113,7 @@ option(exceptions "build with exception support" ON)
 option(logging "build with logging" OFF)
 option(verbose-logging "build with verbose logging" OFF)
 option(build_tests "build tests" OFF)
-option(build_examples "build examples" OFF)
+option(build_examples "build examples" ON)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release RelWithDebInfo)
 

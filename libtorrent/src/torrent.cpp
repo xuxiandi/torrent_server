@@ -279,6 +279,7 @@ namespace libtorrent
 		PRINT_OFFSETOF(torrent, m_last_working_tracker)
 //		PRINT_OFFSETOF(torrent, m_finished_time:24)
 //		PRINT_OFFSETOF(torrent, m_sequential_download:1)
+//		PRINT_OFFSETOF(torrent, m_user_defined_download:1)
 //		PRINT_OFFSETOF(torrent, m_got_tracker_response:1)
 //		PRINT_OFFSETOF(torrent, m_connections_initialized:1)
 //		PRINT_OFFSETOF(torrent, m_super_seeding:1)
@@ -380,7 +381,7 @@ namespace libtorrent
 		, m_last_working_tracker(-1)
 		, m_finished_time(0)
 		, m_sequential_download(false)
-		, m_user_defined_download(false)	// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+		, m_user_defined_download(false)	// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 		, m_got_tracker_response(false)
 		, m_connections_initialized(false)
 		, m_super_seeding(false)
@@ -436,7 +437,6 @@ namespace libtorrent
 
 #if defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS
 		m_resume_data_loaded = false;
-		m_finished_alert_posted = false;
 #endif
 #if TORRENT_USE_UNC_PATHS
 		m_save_path = canonicalize_path(m_save_path);
@@ -1024,7 +1024,7 @@ namespace libtorrent
 		}
 	}
 
-	// jackarain: ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½Ý¶ï¿½È¡ï¿½Ä¾ï¿½ï¿½ï¿½Êµï¿½ï¿½.
+	// jackarain: ·ÖÆ¬Êý¾Ý¶ÁÈ¡µÄ¾ßÌåÊµÏÖ.
 	void torrent::read_piece(int piece, read_data_fun rdf)
 	{
 		TORRENT_ASSERT(piece >= 0 && piece < m_torrent_file->num_pieces());
@@ -1236,7 +1236,7 @@ namespace libtorrent
 		}
 	}
 
-	// jackarain: ï¿½ï¿½ï¿½Ý¶ï¿½È¡ï¿½ï¿½ï¿½Ä»Øµï¿½.
+	// jackarain: Êý¾Ý¶ÁÈ¡ºóµÄ»Øµ÷.
 	void torrent::on_disk_read_complete(int ret, disk_io_job const& j,
 		peer_request r, boost::shared_ptr<read_piece_struct> rp, read_data_fun rdf)
 	{
@@ -2110,9 +2110,7 @@ namespace libtorrent
 		int blocks_in_last_piece = ((m_torrent_file->total_size() % m_torrent_file->piece_length())
 			+ block_size() - 1) / block_size();
 		m_picker->init(blocks_per_piece, blocks_in_last_piece, m_torrent_file->num_pieces());
-#if defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS
-		m_finished_alert_posted = false;
-#endif
+
 		// assume that we don't have anything
 		TORRENT_ASSERT(m_picker->num_have() == 0);
 		m_files_checked = false;
@@ -5376,7 +5374,7 @@ namespace libtorrent
 		ret["num_downloaded"] = m_downloaded;
 
 		ret["sequential_download"] = m_sequential_download;
-		// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+		// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 		ret["user_defined_download"] = m_user_defined_download;
 
 		ret["seed_mode"] = m_seed_mode;
@@ -6331,18 +6329,8 @@ namespace libtorrent
 	{
 		INVARIANT_CHECK;
 
-		TORRENT_ASSERT(!m_finished_alert_posted);
 		TORRENT_ASSERT(is_finished());
 		TORRENT_ASSERT(m_state != torrent_status::finished && m_state != torrent_status::seeding);
-
-		if (alerts().should_post<torrent_finished_alert>())
-		{
-			alerts().post_alert(torrent_finished_alert(
-				get_handle()));
-		}
-#if defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS
-		m_finished_alert_posted = true;
-#endif
 
 		set_state(torrent_status::finished);
 		set_queue_position(-1);
@@ -6404,9 +6392,6 @@ namespace libtorrent
 	{
 		INVARIANT_CHECK;
 	
-#if defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS
-		m_finished_alert_posted = false;
-#endif
 		TORRENT_ASSERT(!is_finished());
 		set_state(torrent_status::downloading);
 		set_queue_position((std::numeric_limits<int>::max)());
@@ -6686,12 +6671,6 @@ namespace libtorrent
 		else
 			TORRENT_ASSERT(m_queued_for_checking);
 
-		if (!m_finished_alert_posted)
-		{
-			TORRENT_ASSERT(m_state != torrent_status::seeding
-				&& m_state != torrent_status::finished);
-		}
-
 		if (!m_ses.m_queued_for_checking.empty())
 		{
 			// if there are torrents waiting to be checked
@@ -6856,7 +6835,7 @@ namespace libtorrent
 		state_updated();
 	}
 
-	// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+	// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 	void torrent::set_user_defined_download(bool ud)
 	{
 		TORRENT_ASSERT(m_ses.is_network_thread());
@@ -7072,7 +7051,7 @@ namespace libtorrent
 		return limit;
 	}
 
-	void torrent::delete_files()
+	bool torrent::delete_files()
 	{
 		TORRENT_ASSERT(m_ses.is_network_thread());
 
@@ -7088,7 +7067,9 @@ namespace libtorrent
 			TORRENT_ASSERT(m_storage);
 			m_storage->async_delete_files(
 				boost::bind(&torrent::on_files_deleted, shared_from_this(), _1, _2));
+			return true;
 		}
+		return false;
 	}
 
 	void torrent::clear_error()
@@ -7616,12 +7597,13 @@ namespace libtorrent
 #endif
 		if (next_announce <= now) next_announce = now;
 
+		// don't re-issue the timer if it's the same expiration time as last time
+		// if m_waiting_tracker is false, expires_at() is undefined
+		if (m_waiting_tracker && m_tracker_timer.expires_at() == next_announce) return;
+
 		m_waiting_tracker = true;
 		error_code ec;
 		boost::weak_ptr<torrent> self(shared_from_this());
-
-		// don't re-issue the timer if it's the same expiration time as last time
-		if (m_tracker_timer.expires_at() == next_announce) return;
 
 #if defined TORRENT_ASIO_DEBUGGING
 		add_outstanding_async("tracker::on_tracker_announce_disp");
@@ -8657,12 +8639,6 @@ namespace libtorrent
 		if (s == torrent_status::seeding)
 			TORRENT_ASSERT(is_seed());
 
-		if (!m_finished_alert_posted)
-		{
-			TORRENT_ASSERT(s != torrent_status::seeding
-				&& s != torrent_status::finished);
-		}
-
 		if (s == torrent_status::seeding)
 			TORRENT_ASSERT(is_seed());
 		if (s == torrent_status::finished)
@@ -8672,8 +8648,20 @@ namespace libtorrent
 #endif
 
 		if (int(m_state) == s) return;
+
 		if (m_ses.m_alerts.should_post<state_changed_alert>())
-			m_ses.m_alerts.post_alert(state_changed_alert(get_handle(), s, (torrent_status::state_t)m_state));
+		{
+			m_ses.m_alerts.post_alert(state_changed_alert(get_handle()
+				, s, (torrent_status::state_t)m_state));
+		}
+
+		if (s == torrent_status::finished
+			&& m_ses.m_alerts.should_post<torrent_finished_alert>())
+		{
+			alerts().post_alert(torrent_finished_alert(
+				get_handle()));
+		}
+
 
 		m_state = s;
 
@@ -8797,7 +8785,7 @@ namespace libtorrent
 		st->paused = is_torrent_paused();
 		st->auto_managed = m_auto_managed;
 		st->sequential_download = m_sequential_download;
-		// jackarain: ï¿½Ã»ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½Ê½.
+		// jackarain: ÓÃ»§×Ô¶¨ÒåÏÂÔØ·½Ê½.
 		st->user_defined_download = m_user_defined_download;
 		st->is_seeding = is_seed();
 		st->is_finished = is_finished();

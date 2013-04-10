@@ -61,7 +61,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <winioctl.h>
 #ifndef TORRENT_MINGW
 #include <direct.h> // for _getcwd, _mkdir
-#ifndef ERROR_CANT_WAIT	// jackarain: 淇ERROR_CANT_WAIT鏈畾涔夌殑閿欒.
+#ifndef ERROR_CANT_WAIT	// jackarain: 修正ERROR_CANT_WAIT未定义的错误.
 #define ERROR_CANT_WAIT 554L
 #endif
 #else
