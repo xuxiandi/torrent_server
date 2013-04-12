@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
 	{
 		add_torrent_params p;
 		boost::system::error_code ec;
+		std::string filename;
 
 		// open torrent file for download.
 		{
@@ -76,6 +77,15 @@ int main(int argc, char* argv[])
 
 		// 创建libtorrent::session对象.
 		session s;
+
+		std::vector<char> in;
+		if (load_file(".ses_state", in, ec) == 0)
+		{
+			lazy_entry e;
+			if (lazy_bdecode(&in[0], &in[0] + in.size(), e, ec) == 0)
+				s.load_state(e);
+		}
+
 		session *session_obj = &s;
 		session_obj->add_dht_router(std::make_pair(
 			std::string("router.bittorrent.com"), 6881));
@@ -101,7 +111,7 @@ int main(int argc, char* argv[])
 		session_obj->set_settings(settings);
 
 		lazy_entry resume_data;
-		std::string filename = combine_path(".", combine_path(".resume", to_hex(p.ti->info_hash().to_string()) + ".resume"));
+		filename = combine_path(".", combine_path(".resume", to_hex(p.ti->info_hash().to_string()) + ".resume"));
 		std::vector<char> buf;
 		if (load_file(filename.c_str(), buf, ec) == 0)
 			p.resume_data = &buf;
@@ -160,6 +170,7 @@ int main(int argc, char* argv[])
 		}
 		printf("\nwaiting for resume data [%d]\n", num_outstanding_resume_data);
 
+		boost::filesystem::create_directory(".resume", ec);
 		while (num_outstanding_resume_data > 0)
 		{
 			alert const* a = s.wait_for_alert(seconds(10));
