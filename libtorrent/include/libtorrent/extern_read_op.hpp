@@ -378,8 +378,7 @@ protected:
 	   {
 		   // 计算偏移点和数据大小.
 		   size_type cp_offset = m_read_offset - offset;
-		   size_type cp_size = size - cp_offset >= m_request_size 
-			   ? m_request_size : size - cp_offset;
+		   size_type cp_size = size - cp_offset >= m_request_size ? m_request_size : size - cp_offset;
 		   // 拷贝并通知读取数据完成.
 		   memcpy(m_current_buffer, data + cp_offset, cp_size);
 		   *m_read_size = cp_size;
