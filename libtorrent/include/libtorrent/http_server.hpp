@@ -896,7 +896,7 @@ namespace http {
 					rep.status = reply::partial_content;
 
 				boost::int64_t file_size = 0;
-				std::size_t body_size = 0;
+				boost::int64_t body_size = 0;
 
 				/// 回调函数, 处理用户请求.
 				if (m_request_callback)

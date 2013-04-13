@@ -2102,17 +2102,10 @@ namespace libtorrent
 	std::pair<int, int> piece_picker::expand_piece(int piece, int whole_pieces
 		, bitfield const& have) const
 	{
+		TORRENT_ASSERT(piece >= 0);
 		if (whole_pieces == 0) return std::make_pair(piece, piece + 1);
-
-		int start = piece - 1;
-		int lower_limit = piece - whole_pieces;
-		if (lower_limit < -1) lower_limit = -1;
-		while (start > lower_limit
-			&& can_pick(start, have))
-			--start;
-		++start;
-		TORRENT_ASSERT(start >= 0);
-		int end = piece + 1;
+		int start = piece;
+		int end = start + 1;
 		int upper_limit = start + whole_pieces;
 		if (upper_limit > int(m_piece_map.size())) upper_limit = int(m_piece_map.size());
 		while (end < upper_limit
