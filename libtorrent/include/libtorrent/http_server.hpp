@@ -191,13 +191,54 @@ namespace http {
 				const char* mime_type;
 			} mappings[] =
 			{
+				{ "htm",   "text/html" },
+				{ "html",  "text/html" },
+				{ "txt",   "text/plain" },
+				{ "xml",   "text/xml" },
+				{ "dtd",   "text/dtd" },
+				{ "css",   "text/css" },
+
+				/* image mime */
+				{ "gif",   "image/gif" },
+				{ "jpe",   "image/jpeg" },
+				{ "jpg",   "image/jpeg" },
+				{ "jpeg",  "image/jpeg" },
+				{ "png",   "image/png" },
+				/* same as modules/mux/mpjpeg.c here: */
+				{ ".mpjpeg","multipart/x-mixed-replace; boundary=7b3cc56e5f51db803f790dad720ed50a" },
+
+				/* media mime */
 				{ "flv", "video/flv" },
 				{ "rmvb", "video/x-pn-realvideo" },
-				{ "gif", "image/gif" },
-				{ "htm", "text/html" },
-				{ "html", "text/html" },
-				{ "jpg", "image/jpeg" },
-				{ "png", "image/png" },
+				{ "mp4", "video/mp4" },
+				{ "3gp", "video/3gpp" },
+				{ "divx", "video/divx" },
+				{ "avi",   "video/avi" },
+				{ "asf",   "video/x-ms-asf" },
+				{ "m1a",   "audio/mpeg" },
+				{ "m2a",   "audio/mpeg" },
+				{ "m1v",   "video/mpeg" },
+				{ "m2v",   "video/mpeg" },
+				{ "mp2",   "audio/mpeg" },
+				{ "mp3",   "audio/mpeg" },
+				{ "mpa",   "audio/mpeg" },
+				{ "mpg",   "video/mpeg" },
+				{ "mpeg",  "video/mpeg" },
+				{ "mpe",   "video/mpeg" },
+				{ "mov",   "video/quicktime" },
+				{ "moov",  "video/quicktime" },
+				{ "oga",   "audio/ogg" },
+				{ "ogg",   "application/ogg" },
+				{ "ogm",   "application/ogg" },
+				{ "ogv",   "video/ogg" },
+				{ "ogx",   "application/ogg" },
+				{ "opus",  "audio/ogg; codecs=opus" },
+				{ "spx",   "audio/ogg" },
+				{ "wav",   "audio/wav" },
+				{ "wma",   "audio/x-ms-wma" },
+				{ "wmv",   "video/x-ms-wmv" },
+				{ "webm",  "video/webm" },
+
 				{ 0, 0 } // Marks end of list.
 			};
 
@@ -928,26 +969,30 @@ namespace http {
 				req.body_size = range_start + body_size;
 				req.keep_alive = is_keep_alive;
 				req.offset = range_start;
+				range_end = req.body_size - 1;
 
-				std::cout << "request: offset " << range_start <<
-					", body_size " << body_size << std::endl;
+				std::cout << "request: offset: " << range_start << ", end offset: "
+					<< range_end <<  ", body_size: " << req.body_size << ", file size: "
+					<< file_size << std::endl;
 
-				rep.headers.resize(5);
+				rep.headers.resize(6);
 				rep.headers[0].name = "Content-Length";
-				rep.headers[0].value = boost::lexical_cast<std::string>(req.body_size);
-				rep.headers[1].name = "Content-Range";
-				rep.headers[1].value = boost::lexical_cast<std::string>(range_start)
-					+ "-" + boost::lexical_cast<std::string>(range_start + (req.body_size - 1)) 
+				rep.headers[0].value = boost::lexical_cast<std::string>(body_size);
+				rep.headers[1].name = "Server";
+				rep.headers[1].value = "TorrentServer/1.0";
+				rep.headers[2].name = "Content-Range";
+				rep.headers[2].value = "bytes " + boost::lexical_cast<std::string>(range_start)
+					+ "-" + boost::lexical_cast<std::string>(range_end) 
 					+ "/" + boost::lexical_cast<std::string>(file_size);
-				rep.headers[2].name = "Content-Type";
-				rep.headers[2].value = mime_types::extension_to_type(extension);
-				rep.headers[3].name = "Connection";
+				rep.headers[3].name = "Content-Type";
+				rep.headers[3].value = mime_types::extension_to_type(extension);
+				rep.headers[4].name = "Connection";
 				if (req.keep_alive)
-					rep.headers[3].value = "keep-alive";
+					rep.headers[4].value = "keep-alive";
 				else
-					rep.headers[3].value = "close";
-				rep.headers[4].name = "Accept-Ranges";
-				rep.headers[4].value = "bytes";
+					rep.headers[4].value = "close";
+				rep.headers[5].name = "Accept-Ranges";
+				rep.headers[5].value = "bytes";
 			}
 
 		private:
