@@ -1265,7 +1265,6 @@ namespace http {
 					// async read http header.
 					if (m_reply->status != reply::bad_request)
 					{
-						std::cout << " keep alive: " << m_keep_alive << std::endl;
 						boost::asio::async_read_until(m_socket, m_response, "\r\n\r\n", 
 							boost::bind(&connection::handle_read, shared_from_this(),
 							boost::asio::placeholders::error,
