@@ -1564,24 +1564,35 @@ namespace libtorrent
 		if (options & user_defined_download)
 		{
 			int playing_pos = 0;
-			for (int i = playing_pos; i < m_piece_map.size(); ++i)
-				if (m_piece_map[i].piece_priority == 7) {
+			int piece_size = m_piece_map.size();
+			for (int i = playing_pos; i < piece_size; ++i)
+			{
+				if (m_piece_map[i].piece_priority == 7)
 					playing_pos = i;
-					break;
-				}
 
-				for (int i = playing_pos; i < m_piece_map.size(); ++i)
-				{	
-					if (!is_piece_free(i, pieces))
-						continue;
-					num_blocks = add_blocks(i, pieces
-						, interesting_blocks, backup_blocks
-						, backup_blocks2, num_blocks
-						, prefer_whole_pieces, peer, suggested_pieces
-						, speed, options);
-					if (num_blocks <= 0)
-						return;
+				if (playing_pos != 0)
+				{
+					if (can_pick(playing_pos, pieces))
+						break;
+					else
+						playing_pos++;
 				}
+			}
+
+			if (playing_pos == piece_size) playing_pos = 0;
+
+			for (int i = playing_pos; i < piece_size; ++i)
+			{
+				if (!is_piece_free(i, pieces))
+					continue;
+				num_blocks = add_blocks(i, pieces
+					, interesting_blocks, backup_blocks
+					, backup_blocks2, num_blocks
+					, prefer_whole_pieces, peer, suggested_pieces
+					, speed, options);
+				if (num_blocks <= 0)
+					return;
+			}
 		}
 
 		if (options & sequential)
