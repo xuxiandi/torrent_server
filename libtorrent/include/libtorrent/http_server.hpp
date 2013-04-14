@@ -971,9 +971,11 @@ namespace http {
 				req.offset = range_start;
 				range_end = req.body_size - 1;
 
+#if defined(_DEBUG) && defined(WIN32)
 				std::cout << "request: offset: " << range_start << ", end offset: "
 					<< range_end <<  ", body_size: " << req.body_size << ", file size: "
 					<< file_size << std::endl;
+#endif
 
 				rep.headers.resize(6);
 				rep.headers[0].name = "Content-Length";
