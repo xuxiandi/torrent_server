@@ -425,11 +425,11 @@ namespace http {
 				{
 					header& h = headers[i];
 					reply_string += h.name + 
-						misc_strings::name_value_separator + 
+						std::string(misc_strings::name_value_separator,2) + 
 						h.value +
-						misc_strings::crlf;
+						std::string(misc_strings::crlf,2);
 				}
-				reply_string += misc_strings::crlf;
+				reply_string += std::string(misc_strings::crlf,2);
 
 				return reply_string;
 			}

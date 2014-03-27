@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		add_torrent_params p;
+		p.save_path = "." ;
 		boost::system::error_code ec;
 		std::string filename;
 
