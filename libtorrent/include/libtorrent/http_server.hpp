@@ -23,8 +23,8 @@
 // * $Id: http_server.h 98 2011-08-19 16:08:52Z jack $
 //
 
-#ifndef __HTTP_SERVER_H__
-#define __HTTP_SERVER_H__
+#ifndef TORRENT_HTTP_SERVER_HPP
+#define TORRENT_HTTP_SERVER_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -92,8 +92,8 @@ namespace http {
 
 		namespace misc_strings {
 
-			const char name_value_separator[] = { ':', ' ' };
-			const char crlf[] = { '\r', '\n' };
+			const char name_value_separator = ": ";
+			const char crlf[] = "\r\n";
 
 		} // namespace misc_strings
 
@@ -424,12 +424,12 @@ namespace http {
 				for (std::size_t i = 0; i < headers.size(); ++i)
 				{
 					header& h = headers[i];
-					reply_string += h.name + 
-						std::string(misc_strings::name_value_separator,2) + 
+					reply_string += h.name +
+						misc_strings::name_value_separator +
 						h.value +
-						std::string(misc_strings::crlf,2);
+						misc_strings::crlf;
 				}
-				reply_string += std::string(misc_strings::crlf,2);
+				reply_string += misc_strings::crlf;
 
 				return reply_string;
 			}
@@ -1499,4 +1499,4 @@ namespace http {
 } // namespace http
 } // namespace libtorrent
 
-#endif // __HTTP_SERVER_H__
+#endif // TORRENT_HTTP_SERVER_HPP
